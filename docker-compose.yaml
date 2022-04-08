@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  mysqlsrv:
+    image: mysql:5.7.37
+    environment:
+      MYSQL_ROOT_PASSWORD: "toor"
+      MYSQL_DATABASE: "pix"
+    ports:
+      - "3307:3306"
+    networks:
+      - mysql-compose-network
+
+networks:
+  mysql-compose-network:
+    driver: bridge
