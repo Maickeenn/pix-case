@@ -14,7 +14,9 @@ public class KeyMapper {
                 .setBranchNumber(Integer.valueOf(keyDTO.getBranchNumber()))
                 .setAccountNumber(Integer.valueOf(keyDTO.getAccounteNumber()))
                 .setClientName(keyDTO.getClientName())
-                .setClientLastName(keyDTO.getClientLastName());
+                .setClientLastName(keyDTO.getClientLastName())
+                .setCreateDate(keyDTO.getCreateTime())
+                .setDeactivationDate(keyDTO.getDeactivateDateTime());
     }
 
     public static KeyDTO entityToKeyDto(KeyEntity keyEntity) {

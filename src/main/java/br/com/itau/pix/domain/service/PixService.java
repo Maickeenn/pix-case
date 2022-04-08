@@ -44,7 +44,7 @@ public class PixService implements PixPort {
         } else if (byId.get().getDeactivationDate() != null) {
                 throw new InvalidKeyException();
         }
-        return entityToKeyDto(pixRepository.save(dtoToEntity(keyDTO)));
+        return entityToKeyDto(pixRepository.save(dtoToEntity(keyDTO.setCreateTime(byId.get().getCreateDate()))));
     }
 
     @Override
