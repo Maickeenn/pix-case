@@ -50,12 +50,12 @@ public class PixService implements PixPort {
     @Override
     public KeyDTO deactivateKey(UUID id) {
         final Optional<KeyEntity> key = pixRepository.findByIdAndDeactivationDate(id, null);
-        return entityToKeyDto(pixRepository.save(key.orElseThrow(() -> new InvalidKeyException()).setDeactivationDate(LocalDateTime.now())));
+        return entityToKeyDto(pixRepository.save(key.orElseThrow(InvalidKeyException::new).setDeactivationDate(LocalDateTime.now())));
     }
 
     @Override
     public KeyEntity findKeyById(UUID keyId) {
-        return pixRepository.findByIdAndDeactivationDate(keyId, null).orElseThrow(() -> new KeyNotFoundException());
+        return pixRepository.findByIdAndDeactivationDate(keyId, null).orElseThrow(KeyNotFoundException::new);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class PixService implements PixPort {
 
     private void canAddNewKey(KeyDTO keyDTO) {
         int maxKey = keyDTO.getClientType().equals(ClientType.PF) ? 5 : 20;
-        if (pixRepository.countAllByBranchNumberAndAccountNumberAndDeactivationDate(Integer.valueOf(keyDTO.getBranchNumber()), Integer.valueOf(keyDTO.getAccounteNumber()), null) >= maxKey)
+        if (pixRepository.countAllByBranchNumberAndAccountNumberAndDeactivationDate(Integer.parseInt(keyDTO.getBranchNumber()), Integer.parseInt(keyDTO.getAccounteNumber()), null) >= maxKey)
             throw new MaxKeyException();
     }
 }
