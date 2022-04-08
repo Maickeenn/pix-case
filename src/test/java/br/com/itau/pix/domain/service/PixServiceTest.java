@@ -24,6 +24,7 @@ import static br.com.itau.pix.domain.model.util.KeyMapper.dtoToEntity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -40,7 +41,7 @@ public class PixServiceTest {
         final UUID keyId = UUID.randomUUID();
         final KeyDTO dto = getDTO(null, KeyType.CPF, "123456789012", AccountType.CHECKING, ClientType.PF,null, null);
         final KeyEntity entity = dtoToEntity(dto);
-        when(pixRepository.countAllByBranchNumberAndAccountNumber(0,1)).thenReturn(1L);
+        when(pixRepository.countAllByBranchNumberAndAccountNumberAndDeactivationDate(0,1, null)).thenReturn(1L);
         when(pixRepository.save(any(KeyEntity.class))).thenReturn(entity.setId(keyId));
         assertEquals(keyId, pixService.createKey(dto));
     }
@@ -48,11 +49,11 @@ public class PixServiceTest {
     @Test()
     public void shouldNotCreateKey(){
         final KeyDTO dto = getDTO(null, KeyType.CPF, "123456789012", AccountType.CHECKING, ClientType.PF,null, null);
-        when(pixRepository.countAllByBranchNumberAndAccountNumber(0,1)).thenReturn(6L);
+        when(pixRepository.countAllByBranchNumberAndAccountNumberAndDeactivationDate(0,1, null)).thenReturn(6L);
         assertThrows(MaxKeyException.class, () -> pixService.createKey(dto));
 
         dto.setClientType(ClientType.PJ);
-        when(pixRepository.countAllByBranchNumberAndAccountNumber(0,1)).thenReturn(21L);
+        when(pixRepository.countAllByBranchNumberAndAccountNumberAndDeactivationDate(0,1, null)).thenReturn(21L);
         assertThrows(MaxKeyException.class, () -> pixService.createKey(dto));
 
     }
@@ -60,10 +61,9 @@ public class PixServiceTest {
     @Test
     public void shouldUpdateKey(){
         final UUID keyId = UUID.randomUUID();
-        final LocalDateTime now = LocalDateTime.now();
-        final KeyDTO dto = getDTO(keyId, KeyType.CPF, "123456789012", AccountType.CHECKING, ClientType.PF,null, now);
+        final KeyDTO dto = getDTO(keyId, KeyType.CPF, "123456789012", AccountType.CHECKING, ClientType.PF,null, null);
         final KeyEntity entity = dtoToEntity(dto);
-        when(pixRepository.findById(any(UUID.class))).thenReturn(Optional.of(entity.setId(keyId).setDeactivationDate(now)));
+        when(pixRepository.findByIdAndDeactivationDate(any(UUID.class), eq(null))).thenReturn(Optional.of(entity.setId(keyId)));
         when(pixRepository.save(any(KeyEntity.class))).thenReturn(entity.setId(keyId));
         assertEquals(dto, pixService.updateKey(dto));
     }
@@ -73,11 +73,10 @@ public class PixServiceTest {
         final UUID keyId = UUID.randomUUID();
         final KeyDTO dto = getDTO(keyId, KeyType.CPF, "123456789012", AccountType.CHECKING, ClientType.PF,null, null);
         final KeyEntity entity = dtoToEntity(dto);
-        when(pixRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+        when(pixRepository.findByIdAndDeactivationDate(any(UUID.class), eq(null))).thenReturn(Optional.empty());
         assertThrows(KeyNotFoundException.class,() -> pixService.updateKey(dto));
 
-        when(pixRepository.findById(any(UUID.class))).thenReturn(Optional.of(entity.setCreateDate(null)));
+        when(pixRepository.findByIdAndDeactivationDate(any(UUID.class), eq(null))).thenReturn(Optional.of(entity.setDeactivationDate(LocalDateTime.now())));
         assertThrows(InvalidKeyException.class,() -> pixService.updateKey(dto));
-
     }
 }

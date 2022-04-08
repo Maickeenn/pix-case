@@ -13,12 +13,12 @@ import java.util.UUID;
 @Repository
 public interface PixRepository extends JpaRepository<KeyEntity, UUID> {
 
-    long countAllByBranchNumberAndAccountNumber(int branch, int account);
-    Optional<KeyEntity> findById(UUID id);
-    List<KeyEntity> findAllByKeyType(KeyType keyType);
-    List<KeyEntity> findAllByBranchNumberAndAccountNumber(int branch, int account);
-    List<KeyEntity> findAllByClientNameAndClientLastName(String clientName, String clientLastName);
-    List<KeyEntity> findAllByCreateDate(LocalDateTime createDate);
-    List<KeyEntity> findAllByDeactivationDate(LocalDateTime deactivationDate);
+    long countAllByBranchNumberAndAccountNumberAndDeactivationDate(int branch, int account, LocalDateTime deactrivationDate);
+    Optional<KeyEntity> findByIdAndDeactivationDate(UUID id, LocalDateTime deactrivationDate);
+    List<KeyEntity> findAllByKeyTypeAndDeactivationDate(KeyType keyType, LocalDateTime deactrivationDate);
+    List<KeyEntity> findAllByBranchNumberAndAccountNumberAndDeactivationDate(int branch, int account, LocalDateTime deactrivationDate);
+    List<KeyEntity> findAllByClientNameAndClientLastNameAndDeactivationDate(String clientName, String clientLastName, LocalDateTime deactrivationDate);
+    List<KeyEntity> findAllByCreateDateAndDeactivationDate(LocalDateTime createDate, LocalDateTime deactrivationDate);
+    List<KeyEntity> findAllByDeactivationDateAndDeactivationDate(LocalDateTime deactivationDate, LocalDateTime deactrivationDate);
 
 }

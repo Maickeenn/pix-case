@@ -38,10 +38,10 @@ public class PixService implements PixPort {
 
     @Override
     public KeyDTO updateKey(KeyDTO keyDTO) {
-        final Optional<KeyEntity> byId = pixRepository.findById(keyDTO.getKeyId());
+        final Optional<KeyEntity> byId = pixRepository.findByIdAndDeactivationDate(keyDTO.getKeyId(), null);
         if (byId.isEmpty()) {
             throw new KeyNotFoundException();
-        } else if (byId.get().getDeactivationDate() == null) {
+        } else if (byId.get().getDeactivationDate() != null) {
                 throw new InvalidKeyException();
         }
         return entityToKeyDto(pixRepository.save(dtoToEntity(keyDTO)));
@@ -49,53 +49,53 @@ public class PixService implements PixPort {
 
     @Override
     public KeyDTO deactivateKey(UUID id) {
-        final Optional<KeyEntity> key = pixRepository.findById(id);
+        final Optional<KeyEntity> key = pixRepository.findByIdAndDeactivationDate(id, null);
         return entityToKeyDto(pixRepository.save(key.orElseThrow(() -> new InvalidKeyException()).setDeactivationDate(LocalDateTime.now())));
     }
 
     @Override
     public KeyEntity findKeyById(UUID keyId) {
-        return pixRepository.findById(keyId).orElseThrow(() -> new KeyNotFoundException());
+        return pixRepository.findByIdAndDeactivationDate(keyId, null).orElseThrow(() -> new KeyNotFoundException());
     }
 
     @Override
     public List<KeyDTO> findKeyByKeyType(KeyType keyType) {
-        return pixRepository.findAllByKeyType(keyType).stream()
+        return pixRepository.findAllByKeyTypeAndDeactivationDate(keyType, null).stream()
                 .map(KeyMapper::entityToKeyDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<KeyDTO> findKeyByBranchAndAccount(int branch, int account) {
-        return pixRepository.findAllByBranchNumberAndAccountNumber(branch, account).stream()
+        return pixRepository.findAllByBranchNumberAndAccountNumberAndDeactivationDate(branch, account, null).stream()
                 .map(KeyMapper::entityToKeyDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<KeyDTO> findKeyByClientName(String clientName, String clientLastName) {
-        return pixRepository.findAllByClientNameAndClientLastName(clientName, clientLastName).stream()
+        return pixRepository.findAllByClientNameAndClientLastNameAndDeactivationDate(clientName, clientLastName, null).stream()
                 .map(KeyMapper::entityToKeyDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<KeyDTO> findKeyByCreateDate(LocalDateTime createDate) {
-        return pixRepository.findAllByCreateDate(createDate).stream()
+        return pixRepository.findAllByCreateDateAndDeactivationDate(createDate, null).stream()
                 .map(KeyMapper::entityToKeyDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<KeyDTO> findKeyByDeactivateDate(LocalDateTime deactivationDate) {
-        return pixRepository.findAllByDeactivationDate(deactivationDate).stream()
+        return pixRepository.findAllByDeactivationDateAndDeactivationDate(deactivationDate, null).stream()
                 .map(KeyMapper::entityToKeyDto)
                 .collect(Collectors.toList());
     }
 
     private void canAddNewKey(KeyDTO keyDTO) {
         int maxKey = keyDTO.getClientType().equals(ClientType.PF) ? 5 : 20;
-        if (pixRepository.countAllByBranchNumberAndAccountNumber(Integer.valueOf(keyDTO.getBranchNumber()), Integer.valueOf(keyDTO.getAccounteNumber())) >= maxKey)
+        if (pixRepository.countAllByBranchNumberAndAccountNumberAndDeactivationDate(Integer.valueOf(keyDTO.getBranchNumber()), Integer.valueOf(keyDTO.getAccounteNumber()), null) >= maxKey)
             throw new MaxKeyException();
     }
 }
